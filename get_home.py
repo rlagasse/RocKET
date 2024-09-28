@@ -1,4 +1,5 @@
 import pygame
+import math
 
 # run with python get_home.py
 
@@ -12,13 +13,17 @@ screen_height = 512
 gravity = 0.5
 FLOOR = screen_height - 100
 screen = pygame.display.set_mode((screen_width, screen_height))
-background = pygame.image.load('assets/forest_background_resize.png')
+background = pygame.image.load('assets/forest_background_resize.png').convert()
+background_width = background.get_width()
 pygame.display.set_caption('Get Home')
 
 clock = pygame.time.Clock()
 FPS = 60
 
-
+# scrolling background
+scroll = 0
+tiles = math.ceil(screen_width/ background_width) + 50 # adds 50 tiles, may increase as needed
+print(tiles)
 
 class Vampire(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, speed):
@@ -85,10 +90,16 @@ while game:
 
     clock.tick(FPS)
 
-    # background image
+    # scrolling background
     screen.fill((0, 0, 0))
-    screen.blit(background, (0, 0))
-    pygame.draw.line(screen, (0, 0, 0), (0, FLOOR), (screen_width, FLOOR))
+    for i in range (0, tiles):
+        screen.blit(background, (i*background_width + scroll, 0))
+    
+    scroll -= 5
+    if scroll > background_width:
+        scroll = 0
+
+    #pygame.draw.line(screen, (0, 0, 0), (0, FLOOR), (screen_width, FLOOR))
 
     for event in pygame.event.get():
 
