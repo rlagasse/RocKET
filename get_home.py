@@ -164,8 +164,8 @@ for i in range(numGarlics):
     garlic = Garlic(x, y, 0.5)
     garlic_sprites.append(garlic)
 
-def collision_detected():
-    user.health -= 0.5 # decrease health and update
+def collision_detected(damage):
+    user.health -= damage # decrease health and update
     health_bar.hp = user.health
 
 
@@ -249,10 +249,13 @@ while game:
     for garlic in garlic_sprites: 
         garlic.update()
         screen.blit(garlic.garlic, garlic.rect)
+        gar_offset = (user.rect.x - garlic.rect.x, user.rect.y - garlic.rect.y)
+        if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
+            collision_detected(1)
 
-    offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
-    if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
-        collision_detected()
+    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
+        collision_detected(0.5)
 
 
     if health_bar.hp == 0:
