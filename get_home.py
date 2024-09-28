@@ -170,9 +170,14 @@ class human:
         # create a rectangle object
         self.rect = self.human.get_rect()
         self.rect.center = (x,y)
+        self.human_mask = pygame.mask.from_surface(self.human)
 
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
+
+    def update(self):
+        speed = 5
+        self.rect.x -= speed
 
 
 aHuman = human(300, 370, 0.05, 1.5)
@@ -181,26 +186,41 @@ user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
 sunlight = Sunlight(0, 450, 1) # spawn in corner
 health_bar = HealthBar(450, 10, 300, 40, 100)
 test_garlic = Garlic(200, 250, 0.5)
-garlic_sprites = []
-numGarlics = 30
 # Used for Vampire/Bat conversion check
 start_time_y = None
 previous_y = None
 
+# Garlic Generations
+garlic_sprites = []
+numGarlics = 30
 for i in range(numGarlics):
     x = randint(screen_width, screen_width+10000)
     y = randint(screen_height - FLOOR, screen_height)
     garlic = Garlic(x, y, 0.5)
     garlic_sprites.append(garlic)
 
+# Human Generations
+human_sprites = []
+numHumans = 10
+for i in range(numHumans):
+    x = randint(screen_width, screen_width+10000)
+    aHuman = human(x, screen_height-150, 0.05, 1.5)
+    human_sprites.append(aHuman)
+
 def collision_detected(damage):
     user.health -= damage # decrease health and update
     health_bar.hp = user.health
+
+def human_collision():
+    if health_bar.hp < 100:
+        user.health += 0.5
+        health_bar.hp = user.health
 
 
 # main game loop
 game = True
 while game:
+
     # exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -254,8 +274,6 @@ while game:
     # Draw the text on the screen
     screen.blit(text_surface, text_rect)
 
-    #print("X and Y: ", user.rect.x, user.rect.y)
-
     # Vampire
     user.move(up, down, left, right)
     user.draw() # create user to screen
@@ -275,7 +293,12 @@ while game:
         start_time_y = None
 
     #human
-    aHuman.draw() # create user to screen
+    for aHuman in human_sprites:
+        aHuman.update()
+        aHuman.draw()
+        offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
+        if aHuman.human_mask.overlap(user.vampire_mask, offset2):
+            human_collision
 
     # Health Bar
     health_bar.draw(screen)
@@ -297,6 +320,7 @@ while game:
         if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
             collision_detected(1)
 
+    # Sunlight and Collision
     sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
         collision_detected(0.5)
