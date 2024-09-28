@@ -47,7 +47,7 @@ health_bar = HealthBar(250, 200, 300, 40, 100)
 run = True
 while run:
     screen.fill("indigo")
-    
+
     health_bar.hp = 75
     health_bar.draw(screen)
 
