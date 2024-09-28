@@ -163,7 +163,6 @@ for i in range(numHumans):
 # main game loop
 game = True
 while game:
-    
     # exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
