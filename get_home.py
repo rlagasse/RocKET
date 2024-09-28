@@ -2,6 +2,7 @@ import pygame
 import math
 import time
 from healthbar import *
+import random
 # run with python get_home.py
 
 # key coordinates
@@ -110,10 +111,39 @@ def collision_detected():
     health_bar.hp = user.health
 
 
+
+class human:
+    def __init__ (self, x, y, scale, speed):
+        #number =random.choice(list) 
+        #print(number)
+        self.speed= speed
+        
+        random_num_list = [1,2,3,4]
+        if (random.choice(random_num_list) == '1'):
+            humanImg = pygame.image.load('assets/human_yellow.png')
+        elif (random.choice(random_num_list)  == '2'):
+            humanImg = pygame.image.load('assets/human_green.png')
+        elif (random.choice(random_num_list)  == '3'):
+            humanImg = pygame.image.load('assets/human_red.png')
+        else:
+            humanImg = pygame.image.load('assets/human_purple.png')
+
+        self.human = pygame.transform.scale(humanImg, (int(humanImg.get_width()*scale), humanImg.get_height()*scale))
+        # create a rectangle object
+        self.rect = self.human.get_rect()
+        self.rect.center = (x,y)
+
+    def draw(self):
+        screen.blit(self.human, self.rect)    # draw the vampire on the screen
+
+
+aHuman = human(300, 370, 0.05, 1.5)
+
+
 # main game loop
 game = True
 while game:
-
+    
     # exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -168,10 +198,12 @@ while game:
     screen.blit(text_surface, text_rect)
 
 
-
     # Vampire
     user.move(up, down, left, right)
     user.draw() # create user to screen
+
+    #human
+    aHuman.draw() # create user to screen
 
     # Health Bar
     health_bar.draw(screen)

@@ -7,8 +7,6 @@ from random import randint
 pygame.init()
 
 
-
-
 #SCREEN_WIDTH = 800
 #SCREEN_HEIGHT = 500
 
@@ -60,7 +58,7 @@ class human:
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
 
-aHuman = human(400, 320, 0.5, 1.5)
+aHuman = human(300, 370, 0.05, 1.5)
 
 game = True
 while game:
