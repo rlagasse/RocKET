@@ -1,0 +1,3 @@
+References
+# reference for starting: https://www.geeksforgeeks.org/introduction-to-pygame/
+# reference for also starting: https://www.youtube.com/watch?v=DHgj5jhMJKg&list=PLjcN1EyupaQm20hlUE11y9y8EY2aXLpnv
