@@ -21,11 +21,11 @@ pygame.display.set_caption('Get Home')
 ## Clock information
 time = pygame.time.Clock()
 FPS = 60
-countdown_time = 60000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
+countdown_time = 30000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
 timer_has_started = False
 program_is_running = True
 font = pygame.font.Font(None, 74)  # None uses the default font, size 74
-
+prev_sec = 30 # used in timing 
 
 # scrolling background
 scroll = 0
@@ -35,12 +35,18 @@ tiles = math.ceil(screen_width/ background_width) + 100 # adds 50 tiles, may inc
 class Sunlight(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-
-        sun_img = pygame.image.load('assets/sunlight_beam_resize.png')
-        self.sunlight = pygame.transform.scale(sun_img, (int(sun_img.get_width()*scale), sun_img.get_height()*scale)) # scale to screen
+        self.scale = scale
+        self.sun_img = pygame.image.load('assets/sunlight_beam_resize.png')
+        self.sunlight = pygame.transform.scale(self.sun_img, (int(self.sun_img.get_width()*scale), self.sun_img.get_height()*scale)) # scale to screen
         # create a rectangle object
         self.rect = self.sunlight.get_rect()
         self.rect.center = (x,y)
+        self.sunlight_mask = pygame.mask.from_surface(self.sunlight)
+
+    def update(self, scale_speed):
+        self.scale += scale_speed
+        self.sunlight = pygame.transform.scale(self.sun_img, (int(self.sun_img.get_width() * self.scale), int(self.sun_img.get_height() * self.scale)))
+        self.rect = self.sunlight.get_rect(center=self.rect.center)
         self.sunlight_mask = pygame.mask.from_surface(self.sunlight)
 
     def draw(self):
@@ -161,9 +167,8 @@ while game:
     time_elapsed = pygame.time.get_ticks() - start_time      # Calculate how much time has passed since the timer started# Elapsed time in milliseconds
 
     time_left = countdown_time - time_elapsed
-
     if time_left <= 0:
-        print("Time's up!")
+        print("You win!")
         time_left = 0  # Set to zero to avoid negative time
         game = False
         # TODO: go to end screen
@@ -191,6 +196,13 @@ while game:
 
     # Sunlight and Collision
     sunlight.draw()
+    if sec != prev_sec: 
+        if sec < 10: # last 10 seconds sun speeds up
+            sunlight.update(0.1)
+        elif sec < 25:
+            sunlight.update(0.05)
+        prev_sec = sec
+
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
