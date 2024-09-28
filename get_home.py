@@ -55,6 +55,8 @@ class Vampire(pygame.sprite.Sprite):
         self.speed = speed
         self.jump = False # jumping logic
         self.jump_velocity = 0
+        self.x = x
+        self.y = y
         vamp_img = pygame.image.load('assets/vampire_side_resized.png')
         self.vampire = pygame.transform.scale(vamp_img, (int(vamp_img.get_width()*scale), vamp_img.get_height()*scale)) # scale to screen
         # create a rectangle object
@@ -96,6 +98,17 @@ class Vampire(pygame.sprite.Sprite):
         
         self.rect.x += dx
         self.rect.y += dy
+
+        # Add vampire boundaries
+        if self.rect.x < 0: 
+            self.rect.x = 0  # Left side of the screen
+        elif self.rect.x + self.rect.width > screen_width:
+            self.rect.x = screen_width - self.rect.width  # Right side of the screen
+
+        if self.rect.y < 0:
+            self.rect.y = 0  # Top side of the screen
+        elif self.rect.y + self.rect.height > screen_height:
+            self.rect.y = screen_height - self.rect.height  # Bottom side of the screen
 
     def draw(self):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
