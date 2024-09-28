@@ -12,7 +12,7 @@ screen_height = 512
 gravity = 0.5
 FLOOR = screen_height - 100
 screen = pygame.display.set_mode((screen_width, screen_height))
-background = pygame.image.load('forest_background_resize.png')
+background = pygame.image.load('assets/forest_background_resize.png')
 pygame.display.set_caption('Get Home')
 
 clock = pygame.time.Clock()
@@ -28,7 +28,7 @@ class Vampire(pygame.sprite.Sprite):
         self.speed = speed
         self.jump = False # jumping logic
         self.jump_velocity = 0
-        vamp_img = pygame.image.load('vampire_side_resized.png')
+        vamp_img = pygame.image.load('assets/vampire_side_resized.png')
         self.vampire = pygame.transform.scale(vamp_img, (int(vamp_img.get_width()*scale), vamp_img.get_height()*scale)) # scale to screen
         # create a rectangle object
         self.rect = self.vampire.get_rect()
