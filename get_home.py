@@ -109,6 +109,55 @@ def collision_detected():
     user.health -= 0.5 # decrease health and update
     health_bar.hp = user.health
 
+def human_collision():
+    if health_bar.hp < 100:
+        user.health += 0.5 # increase health and update
+        health_bar.hp = user.health
+
+class human:
+    def __init__ (self, x, y, scale, speed):
+        #number =random.choice(list) 
+        #print(number)
+        self.speed= speed
+        
+        random_num_list = [1,2,3,4]
+        if (random.choice(random_num_list) == '1'):
+            humanImg = pygame.image.load('assets/human_yellow.png')
+        elif (random.choice(random_num_list)  == '2'):
+            humanImg = pygame.image.load('assets/human_green.png')
+        elif (random.choice(random_num_list)  == '3'):
+            humanImg = pygame.image.load('assets/human_red.png')
+        else:
+            humanImg = pygame.image.load('assets/human_purple.png')
+
+        self.human = pygame.transform.scale(humanImg, (int(humanImg.get_width()*scale), humanImg.get_height()*scale))
+        # create a rectangle object
+        self.rect = self.human.get_rect()
+        self.rect.center = (x,y)
+        self.human_mask = pygame.mask.from_surface(self.human)
+
+    def draw(self):
+        screen.blit(self.human, self.rect)    # draw the vampire on the screen
+
+
+    def update(self):
+        speed = 5
+        self.rect.x -= speed
+
+#human set up
+#aHuman = human(750, 370, 0.05, 1.5)
+human_sprites = []
+numHumans = 10
+
+#loops for human
+for i in range(numHumans):
+     x = randint(screen_width, screen_width+10000)
+     aHuman = human( x, screen_height-150, 0.05, 1.5)
+     human_sprites.append(aHuman)
+
+
+
+
 
 # main game loop
 game = True
@@ -173,6 +222,15 @@ while game:
     user.move(up, down, left, right)
     user.draw() # create user to screen
 
+    # #human
+    # aHuman.draw() # create user to screen
+    for aHuman in human_sprites: 
+        aHuman.update()
+        aHuman.draw()
+        offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
+        if aHuman.human_mask.overlap(user.vampire_mask,offset2):
+            human_collision()
+
     # Health Bar
     health_bar.draw(screen)
 
@@ -182,12 +240,12 @@ while game:
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
 
-
     if health_bar.hp == 0:
         print("Game over!")
         game = False
         # TODO: go to end screen
 
+    pygame.display.flip()
     pygame.display.update() # display updates
 
 pygame.quit()
