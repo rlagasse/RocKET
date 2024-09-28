@@ -110,7 +110,10 @@ def collision_detected():
     user.health -= 0.5 # decrease health and update
     health_bar.hp = user.health
 
-
+def human_collision():
+    if health_bar.hp < 100:
+        user.health += 0.5 # increase health and update
+        health_bar.hp = user.health
 
 class human:
     def __init__ (self, x, y, scale, speed):
@@ -137,9 +140,7 @@ class human:
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
-
 aHuman = human(750, 370, 0.05, 1.5)
-
 
 # main game loop
 game = True
@@ -214,6 +215,14 @@ while game:
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
+
+    offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
+    if aHuman.human_mask.overlap(user.vampire_mask,offset2):
+        human_collision()
+        #temp_x_variable = aHuman.rect.x
+        #aHuman.rect.x = aHuman.rect.y
+        #aHuman.rect.x = temp_x_variable
+        #rota_image = pygame.transform.rotate(aHuman., 180)
     
 
     if health_bar.hp == 0:
