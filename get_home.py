@@ -1,6 +1,6 @@
 import pygame
 import math
-
+import time
 # run with python get_home.py
 
 # key coordinates
@@ -17,8 +17,14 @@ background = pygame.image.load('assets/forest_background_resize.png').convert()
 background_width = background.get_width()
 pygame.display.set_caption('Get Home')
 
-clock = pygame.time.Clock()
+## Clock information
+time = pygame.time.Clock()
 FPS = 60
+countdown_time = 60000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
+timer_has_started = False
+program_is_running = True
+font = pygame.font.Font(None, 74)  # None uses the default font, size 74
+
 
 # scrolling background
 scroll = 0
@@ -102,7 +108,7 @@ while game:
         if event.type == pygame.QUIT:
             game = False
 
-    clock.tick(FPS)
+    time.tick(FPS)
 
     # scrolling background
     screen.fill((0, 0, 0))
@@ -125,9 +131,40 @@ while game:
         user.jump = True
     #user.gravity()
 
+    # Stopwatch
+
+    # If the timer hasn't started yet, start it
+    if not timer_has_started:
+        timer_has_started = True
+        start_time = pygame.time.get_ticks()  # Get the current ticks when the timer starts
+    time_elapsed = pygame.time.get_ticks() - start_time      # Calculate how much time has passed since the timer started# Elapsed time in milliseconds
+
+    time_left = countdown_time - time_elapsed
+
+    if time_left <= 0:
+        print("Time's up!")
+        time_left = 0  # Set to zero to avoid negative time
+        program_is_running = False  # Stop the loop for demonstration purposes
+
+    # Convert remaining time to seconds and format it
+    sec = (time_left // 1000) % 60
+    min = (time_left // 60000) % 60
+    display_time = f"{min:02}:{sec:02}"  # Format as MM:SS
+
+    # Render the timer text
+    text_surface = font.render(display_time, True, (255, 255, 255))  # White color
+    text_rect = text_surface.get_rect(center=(950, 30))  # Top-Right corner
+
+    # Draw the text on the screen
+    screen.blit(text_surface, text_rect)
+
+
+
+    # Vampire
     user.move(up, down, left, right)
     user.draw() # create user to screen
 
+    # Sunlight and Collision
     sunlight.draw()
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
