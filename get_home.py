@@ -1,6 +1,7 @@
 import pygame
 import math
 import time
+from healthbar import *
 # run with python get_home.py
 
 # key coordinates
@@ -10,7 +11,7 @@ pygame.init()
 
 screen_width = 1024
 screen_height = 512
-gravity = 0.5
+
 FLOOR = screen_height - 100
 screen = pygame.display.set_mode((screen_width, screen_height))
 background = pygame.image.load('assets/forest_background_resize.png').convert()
@@ -66,23 +67,27 @@ class Vampire(pygame.sprite.Sprite):
 
         dx = 0
         dy = 0
-
+        gravity = 0.5 
         if up:
             dy = -self.speed
+            gravity = 0
+            self.jump_velocity = 0
         if down:
             dy = self.speed
         if left:
             dx = -self.speed
+
         if right:
             dx = self.speed
 
         if self.jump: # jump detected
-            self.jump_velocity = -2
+            self.jump_velocity = -5
             self.jump = False
+        
+        self.jump_velocity += gravity
 
-        self.jump_velocity += gravity # come back down with gravity
         if self.jump_velocity > 10:
-            self.jump_velocity 
+            self.jump_velocity
         dy += self.jump_velocity
         
         # added floor
@@ -96,8 +101,14 @@ class Vampire(pygame.sprite.Sprite):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
 
 
-user = Vampire(400, 320, 0.5, 1.5) # x, y, scale, speed
+user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
 sunlight = Sunlight(0, 450, 1) # spawn in corner
+health_bar = HealthBar(450, 10, 300, 40, 100)
+
+def collision_detected():
+    user.health -= 0.5 # decrease health and update
+    health_bar.hp = user.health
+
 
 # main game loop
 game = True
@@ -129,9 +140,6 @@ while game:
     jump = keys[pygame.K_SPACE]
     if jump and user.alive: # user jumped
         user.jump = True
-    #user.gravity()
-
-    # Stopwatch
 
     # If the timer hasn't started yet, start it
     if not timer_has_started:
@@ -144,7 +152,8 @@ while game:
     if time_left <= 0:
         print("Time's up!")
         time_left = 0  # Set to zero to avoid negative time
-        program_is_running = False  # Stop the loop for demonstration purposes
+        game = False
+        # TODO: go to end screen
 
     # Convert remaining time to seconds and format it
     sec = (time_left // 1000) % 60
@@ -164,11 +173,20 @@ while game:
     user.move(up, down, left, right)
     user.draw() # create user to screen
 
+    # Health Bar
+    health_bar.draw(screen)
+
     # Sunlight and Collision
     sunlight.draw()
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
-        print("collision detected")
+        collision_detected()
+
+
+    if health_bar.hp == 0:
+        print("Game over!")
+        game = False
+        # TODO: go to end screen
 
     pygame.display.update() # display updates
 
