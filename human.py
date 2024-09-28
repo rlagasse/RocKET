@@ -7,8 +7,6 @@ from random import randint
 pygame.init()
 
 
-
-
 #SCREEN_WIDTH = 800
 #SCREEN_HEIGHT = 500
 
@@ -55,20 +53,13 @@ class human:
         # create a rectangle object
         self.rect = self.human.get_rect()
         self.rect.center = (x,y)
-
-
+        self.human_mask = pygame.mask.from_surface(self.human)
 
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
 
-    def update(self):
-        speed = 5
-        self.rect.x -= speed
-
-
-aHuman = human(400, 320, 0.5, 1.5)
-
+aHuman = human(300, 370, 0.05, 1.5)
 
 game = True
 while game:
@@ -92,9 +83,7 @@ while game:
         if event.type == pygame.QUIT:
             game = False
 
-    
     aHuman.draw() # create user to screen
-
     pygame.display.update() # display updates
 
 pygame.quit()

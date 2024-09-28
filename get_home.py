@@ -22,7 +22,7 @@ pygame.display.set_caption('Get Home')
 ## Clock information
 time = pygame.time.Clock()
 FPS = 60
-countdown_time = 60000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
+countdown_time = 30000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
 timer_has_started = False
 program_is_running = True
 font = pygame.font.Font(None, 74)  # None uses the default font, size 74
@@ -163,7 +163,6 @@ for i in range(numHumans):
 # main game loop
 game = True
 while game:
-
     # exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -216,7 +215,6 @@ while game:
 
     # Draw the text on the screen
     screen.blit(text_surface, text_rect)
-
 
 
     # Vampire
