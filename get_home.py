@@ -2,6 +2,7 @@ import pygame
 import math
 import time
 from healthbar import *
+import random
 # run with python get_home.py
 
 # key coordinates
