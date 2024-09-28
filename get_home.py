@@ -2,6 +2,8 @@ import pygame
 import math
 import time
 from healthbar import *
+from garlic import Garlic
+
 import random
 # run with python get_home.py
 
@@ -121,16 +123,6 @@ class Vampire(pygame.sprite.Sprite):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
 
 
-user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
-sunlight = Sunlight(0, 450, 1) # spawn in corner
-health_bar = HealthBar(450, 10, 300, 40, 100)
-
-def collision_detected():
-    user.health -= 0.5 # decrease health and update
-    health_bar.hp = user.health
-
-
-
 class human:
     def __init__ (self, x, y, scale, speed):
         #number =random.choice(list) 
@@ -157,6 +149,24 @@ class human:
 
 
 aHuman = human(300, 370, 0.05, 1.5)
+
+user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
+sunlight = Sunlight(0, 450, 1) # spawn in corner
+health_bar = HealthBar(450, 10, 300, 40, 100)
+test_garlic = Garlic(200, 250, 0.5)
+garlic_sprites = []
+numGarlics = 30
+#garlic = Garlic( 400, 250, 0.5)
+
+for i in range(numGarlics):
+    x = randint(screen_width, screen_width+10000)
+    y = randint(screen_height - FLOOR, screen_height)
+    garlic = Garlic(x, y, 0.5)
+    garlic_sprites.append(garlic)
+
+def collision_detected():
+    user.health -= 0.5 # decrease health and update
+    health_bar.hp = user.health
 
 
 # main game loop
@@ -234,6 +244,11 @@ while game:
         elif sec < 25:
             sunlight.update(0.05)
         prev_sec = sec
+
+    # Garlic and Collision
+    for garlic in garlic_sprites: 
+        garlic.update()
+        screen.blit(garlic.garlic, garlic.rect)
 
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
