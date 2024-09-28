@@ -1,6 +1,3 @@
-
-
-
 import pygame
 import time #needed for countdown
 
