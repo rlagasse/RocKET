@@ -10,9 +10,9 @@ pygame.init()
 screen_width = 1024
 screen_height = 512
 gravity = 0.5
-FLOOR = screen_height - 50
+FLOOR = screen_height - 100
 screen = pygame.display.set_mode((screen_width, screen_height))
-background = pygame.image.load('background_filler.png')
+background = pygame.image.load('forest_background_resize.png')
 pygame.display.set_caption('Get Home')
 
 clock = pygame.time.Clock()
@@ -28,7 +28,7 @@ class Vampire(pygame.sprite.Sprite):
         self.speed = speed
         self.jump = False # jumping logic
         self.jump_velocity = 0
-        vamp_img = pygame.image.load('vampire_filler.png')
+        vamp_img = pygame.image.load('vampire_side_resized.png')
         self.vampire = pygame.transform.scale(vamp_img, (int(vamp_img.get_width()*scale), vamp_img.get_height()*scale)) # scale to screen
         # create a rectangle object
         self.rect = self.vampire.get_rect()
@@ -75,7 +75,7 @@ class Vampire(pygame.sprite.Sprite):
     #         self.rect.y = screen_height-ty-ty
 
 # generate vampire in center of screen
-user = Vampire(400, 320, 0.5, 1) # x, y, scale, speed
+user = Vampire(400, 320, 0.5, 1.5) # x, y, scale, speed
 
 
 
@@ -83,10 +83,12 @@ user = Vampire(400, 320, 0.5, 1) # x, y, scale, speed
 game = True
 while game:
 
+    clock.tick(FPS)
+
     # background image
     screen.fill((0, 0, 0))
     screen.blit(background, (0, 0))
-    pygame.draw.line(screen, (255, 0, 0), (0, FLOOR), (screen_width, FLOOR))
+    pygame.draw.line(screen, (0, 0, 0), (0, FLOOR), (screen_width, FLOOR))
 
     for event in pygame.event.get():
 
