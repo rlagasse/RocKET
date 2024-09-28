@@ -298,7 +298,7 @@ while game:
         aHuman.draw()
         offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
         if aHuman.human_mask.overlap(user.vampire_mask, offset2):
-            human_collision
+            human_collision()
 
     # Health Bar
     health_bar.draw(screen)
