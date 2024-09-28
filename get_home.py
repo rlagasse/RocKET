@@ -132,12 +132,13 @@ class human:
         # create a rectangle object
         self.rect = self.human.get_rect()
         self.rect.center = (x,y)
+        self.human_mask = pygame.mask.from_surface(self.human)
 
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
 
-aHuman = human(300, 370, 0.05, 1.5)
+aHuman = human(750, 370, 0.05, 1.5)
 
 
 # main game loop
@@ -213,7 +214,7 @@ while game:
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
-
+    
 
     if health_bar.hp == 0:
         print("Game over!")
