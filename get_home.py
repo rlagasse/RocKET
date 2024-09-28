@@ -2,6 +2,8 @@ import pygame
 import math
 import time
 from healthbar import *
+from garlic import Garlic
+
 import random
 # run with python get_home.py
 
@@ -20,13 +22,13 @@ background_width = background.get_width()
 pygame.display.set_caption('Get Home')
 
 ## Clock information
-time = pygame.time.Clock()
+clock = pygame.time.Clock()
 FPS = 60
 countdown_time = 30000  # 1 minute # # Set the countdown time to 1 minute (60000 milliseconds)
 timer_has_started = False
 program_is_running = True
 font = pygame.font.Font(None, 74)  # None uses the default font, size 74
-
+prev_sec = 30 # used in timing 
 
 # scrolling background
 scroll = 0
@@ -36,12 +38,18 @@ tiles = math.ceil(screen_width/ background_width) + 100 # adds 50 tiles, may inc
 class Sunlight(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
-
-        sun_img = pygame.image.load('assets/sunlight_beam_resize.png')
-        self.sunlight = pygame.transform.scale(sun_img, (int(sun_img.get_width()*scale), sun_img.get_height()*scale)) # scale to screen
+        self.scale = scale
+        self.sun_img = pygame.image.load('assets/sunlight_beam_resize.png')
+        self.sunlight = pygame.transform.scale(self.sun_img, (int(self.sun_img.get_width()*scale), self.sun_img.get_height()*scale)) # scale to screen
         # create a rectangle object
         self.rect = self.sunlight.get_rect()
         self.rect.center = (x,y)
+        self.sunlight_mask = pygame.mask.from_surface(self.sunlight)
+
+    def update(self, scale_speed):
+        self.scale += scale_speed
+        self.sunlight = pygame.transform.scale(self.sun_img, (int(self.sun_img.get_width() * self.scale), int(self.sun_img.get_height() * self.scale)))
+        self.rect = self.sunlight.get_rect(center=self.rect.center)
         self.sunlight_mask = pygame.mask.from_surface(self.sunlight)
 
     def draw(self):
@@ -54,15 +62,44 @@ class Vampire(pygame.sprite.Sprite):
         self.alive = True
         self.health = 100
         self.speed = speed
+        self.scale = scale
         self.jump = False # jumping logic
         self.jump_velocity = 0
-        vamp_img = pygame.image.load('assets/vampire_side_resized.png')
-        self.vampire = pygame.transform.scale(vamp_img, (int(vamp_img.get_width()*scale), vamp_img.get_height()*scale)) # scale to screen
+        self.x = x
+        self.y = y
+        self.type = "Vampire"
+        self.vamp_img = pygame.image.load('assets/vampire_side_resized.png') # initially a vampire
+        self.vampire = pygame.transform.scale(self.vamp_img, (int(self.vamp_img.get_width()*scale), self.vamp_img.get_height()*scale)) # scale to screen
         # create a rectangle object
         self.rect = self.vampire.get_rect()
         self.rect.center = (x,y)
         self.vampire_mask = pygame.mask.from_surface(self.vampire)
 
+    def update_position(self):
+        # Update x and y based on the current rectangle's center
+        self.x, self.y = self.rect.center
+
+    def bat_transform(self): # Change sprite into bat
+        self.update_position()
+        self.vamp_img = pygame.image.load('assets/purple_bat_resize.png') # initially a vampire
+        self.vampire = pygame.transform.scale(self.vamp_img, (int(self.vamp_img.get_width()*self.scale), self.vamp_img.get_height()*self.scale)) # scale to screen
+        # create a rectangle object
+        self.rect = self.vampire.get_rect()
+        self.rect.center = (self.x,self.y)
+        self.vampire_mask = pygame.mask.from_surface(self.vampire)
+        self.type = "Bat"
+        self.speed = 8
+    
+    def vampire_transform(self): # Change sprite into vampire
+        self.update_position()
+        self.vamp_img = pygame.image.load('assets/vampire_side_resized.png') # initially a vampire
+        self.vampire = pygame.transform.scale(self.vamp_img, (int(self.vamp_img.get_width()*self.scale), self.vamp_img.get_height()*self.scale)) # scale to screen
+        # create a rectangle object
+        self.rect = self.vampire.get_rect()
+        self.rect.center = (self.x,self.y)
+        self.vampire_mask = pygame.mask.from_surface(self.vampire)
+        self.type = "Vampire"
+        self.speed = 5
 
     def move(self, up, down, left, right): # move the rectangle around
 
@@ -98,22 +135,20 @@ class Vampire(pygame.sprite.Sprite):
         self.rect.x += dx
         self.rect.y += dy
 
+        # Add vampire boundaries
+        if self.rect.x < 0: 
+            self.rect.x = 0  # Left side of the screen
+        elif self.rect.x + self.rect.width > screen_width:
+            self.rect.x = screen_width - self.rect.width  # Right side of the screen
+
+        if self.rect.y < 0:
+            self.rect.y = 0  # Top side of the screen
+        elif self.rect.y + self.rect.height > screen_height:
+            self.rect.y = screen_height - self.rect.height  # Bottom side of the screen
+
     def draw(self):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
 
-
-user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
-sunlight = Sunlight(0, 450, 1) # spawn in corner
-health_bar = HealthBar(450, 10, 300, 40, 100)
-
-def collision_detected():
-    user.health -= 0.5 # decrease health and update
-    health_bar.hp = user.health
-
-def human_collision():
-    if health_bar.hp < 100:
-        user.health += 0.5 # increase health and update
-        health_bar.hp = user.health
 
 class human:
     def __init__ (self, x, y, scale, speed):
@@ -140,35 +175,58 @@ class human:
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
-
     def update(self):
         speed = 5
         self.rect.x -= speed
 
-#human set up
-#aHuman = human(750, 370, 0.05, 1.5)
+
+aHuman = human(300, 370, 0.05, 1.5)
+
+user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
+sunlight = Sunlight(0, 450, 1) # spawn in corner
+health_bar = HealthBar(450, 10, 300, 40, 100)
+test_garlic = Garlic(200, 250, 0.5)
+# Used for Vampire/Bat conversion check
+start_time_y = None
+previous_y = None
+
+# Garlic Generations
+garlic_sprites = []
+numGarlics = 30
+for i in range(numGarlics):
+    x = randint(screen_width, screen_width+10000)
+    y = randint(screen_height - FLOOR, screen_height)
+    garlic = Garlic(x, y, 0.5)
+    garlic_sprites.append(garlic)
+
+# Human Generations
 human_sprites = []
 numHumans = 10
-
-#loops for human
 for i in range(numHumans):
-     x = randint(screen_width, screen_width+10000)
-     aHuman = human( x, screen_height-150, 0.05, 1.5)
-     human_sprites.append(aHuman)
+    x = randint(screen_width, screen_width+10000)
+    aHuman = human(x, screen_height-150, 0.05, 1.5)
+    human_sprites.append(aHuman)
 
+def collision_detected(damage):
+    user.health -= damage # decrease health and update
+    health_bar.hp = user.health
 
-
+def human_collision():
+    if health_bar.hp < 100:
+        user.health += 0.5
+        health_bar.hp = user.health
 
 
 # main game loop
 game = True
 while game:
+
     # exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
 
-    time.tick(FPS)
+    clock.tick(FPS)
 
     # scrolling background
     screen.fill((0, 0, 0))
@@ -190,6 +248,7 @@ while game:
     if jump and user.alive: # user jumped
         user.jump = True
 
+
     # If the timer hasn't started yet, start it
     if not timer_has_started:
         timer_has_started = True
@@ -197,9 +256,8 @@ while game:
     time_elapsed = pygame.time.get_ticks() - start_time      # Calculate how much time has passed since the timer started# Elapsed time in milliseconds
 
     time_left = countdown_time - time_elapsed
-
     if time_left <= 0:
-        print("Time's up!")
+        print("You win!")
         time_left = 0  # Set to zero to avoid negative time
         game = False
         # TODO: go to end screen
@@ -216,18 +274,30 @@ while game:
     # Draw the text on the screen
     screen.blit(text_surface, text_rect)
 
-
     # Vampire
     user.move(up, down, left, right)
     user.draw() # create user to screen
+    # Vampire -> Bat if flying
+    if up and user.type == "Vampire": # or user.: # Flying mode, speed up
+        user.bat_transform()
+    
+    # Bat -> Vampire if on the ground for long enough
+    if user.rect.y == 355 and user.type == "Bat":
+        if previous_y != 355:
+            previous_y = 355
+            start_time_y = time.time()  # Start the timer when user.rect.y becomes 355
+        elif start_time_y and time.time() - start_time_y >= 0.25: # wait 0.25 before becoming vampire
+            user.vampire_transform()
+    else: # not 355 anymore
+        previous_y = None
+        start_time_y = None
 
-    # #human
-    # aHuman.draw() # create user to screen
-    for aHuman in human_sprites: 
+    #human
+    for aHuman in human_sprites:
         aHuman.update()
         aHuman.draw()
         offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
-        if aHuman.human_mask.overlap(user.vampire_mask,offset2):
+        if aHuman.human_mask.overlap(user.vampire_mask, offset2):
             human_collision()
 
     # Health Bar
@@ -235,16 +305,32 @@ while game:
 
     # Sunlight and Collision
     sunlight.draw()
-    offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
-    if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
-        collision_detected()
+    if sec != prev_sec: 
+        if sec < 10: # last 10 seconds sun speeds up
+            sunlight.update(0.1)
+        elif sec < 25:
+            sunlight.update(0.05)
+        prev_sec = sec
+
+    # Garlic and Collision
+    for garlic in garlic_sprites: 
+        garlic.update()
+        screen.blit(garlic.garlic, garlic.rect)
+        gar_offset = (user.rect.x - garlic.rect.x, user.rect.y - garlic.rect.y)
+        if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
+            collision_detected(1)
+
+    # Sunlight and Collision
+    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
+        collision_detected(0.5)
+
 
     if health_bar.hp == 0:
         print("Game over!")
         game = False
         # TODO: go to end screen
 
-    pygame.display.flip()
     pygame.display.update() # display updates
 
 pygame.quit()
