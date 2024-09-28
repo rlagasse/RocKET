@@ -150,6 +150,19 @@ class Vampire(pygame.sprite.Sprite):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
 
 
+user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
+sunlight = Sunlight(0, 450, 1) # spawn in corner
+health_bar = HealthBar(450, 10, 300, 40, 100)
+
+def collision_detected():
+    user.health -= 0.5 # decrease health and update
+    health_bar.hp = user.health
+
+def human_collision():
+    if health_bar.hp < 100:
+        user.health += 0.5 # increase health and update
+        health_bar.hp = user.health
+
 class human:
     def __init__ (self, x, y, scale, speed):
         #number =random.choice(list) 
@@ -170,12 +183,47 @@ class human:
         # create a rectangle object
         self.rect = self.human.get_rect()
         self.rect.center = (x,y)
+        self.human_mask = pygame.mask.from_surface(self.human)
 
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
 
 
-aHuman = human(300, 370, 0.05, 1.5)
+    def update(self):
+        speed = 5
+        self.rect.x -= speed
+
+#human set up
+#aHuman = human(750, 370, 0.05, 1.5)
+human_sprites = []
+numHumans = 10
+
+#loops for human
+for i in range(numHumans):
+     x = randint(screen_width, screen_width+10000)
+     aHuman = human( x, screen_height-150, 0.05, 1.5)
+     human_sprites.append(aHuman)
+
+
+user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
+sunlight = Sunlight(0, 450, 1) # spawn in corner
+health_bar = HealthBar(450, 10, 300, 40, 100)
+test_garlic = Garlic(200, 250, 0.5)
+garlic_sprites = []
+numGarlics = 30
+# Used for Vampire/Bat conversion check
+start_time_y = None
+previous_y = None
+
+for i in range(numGarlics):
+    x = randint(screen_width, screen_width+10000)
+    y = randint(screen_height - FLOOR, screen_height)
+    garlic = Garlic(x, y, 0.5)
+    garlic_sprites.append(garlic)
+
+def collision_detected(damage):
+    user.health -= damage # decrease health and update
+    health_bar.hp = user.health
 
 user = Vampire(400, screen_height - 100, 0.5, 5) # x, y, scale, speed
 sunlight = Sunlight(0, 450, 1) # spawn in corner
@@ -260,7 +308,8 @@ while game:
     # Vampire
     user.move(up, down, left, right)
     user.draw() # create user to screen
-    # Vampire -> Bat if flying
+
+       # Vampire -> Bat if flying
     if up and user.type == "Vampire": # or user.: # Flying mode, speed up
         user.bat_transform()
     
@@ -275,39 +324,30 @@ while game:
         previous_y = None
         start_time_y = None
 
-    #human
-    aHuman.draw() # create user to screen
+    # #human
+    # aHuman.draw() # create user to screen
+    for aHuman in human_sprites: 
+        aHuman.update()
+        aHuman.draw()
+        offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
+        if aHuman.human_mask.overlap(user.vampire_mask,offset2):
+            human_collision()
 
     # Health Bar
     health_bar.draw(screen)
 
     # Sunlight and Collision
     sunlight.draw()
-    if sec != prev_sec: 
-        if sec < 10: # last 10 seconds sun speeds up
-            sunlight.update(0.1)
-        elif sec < 25:
-            sunlight.update(0.05)
-        prev_sec = sec
-
-    # Garlic and Collision
-    for garlic in garlic_sprites: 
-        garlic.update()
-        screen.blit(garlic.garlic, garlic.rect)
-        gar_offset = (user.rect.x - garlic.rect.x, user.rect.y - garlic.rect.y)
-        if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
-            collision_detected(1)
-
-    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
-    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
-        collision_detected(0.5)
-
+    offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
+        collision_detected()
 
     if health_bar.hp == 0:
         print("Game over!")
         game = False
         # TODO: go to end screen
 
+    pygame.display.flip()
     pygame.display.update() # display updates
 
 pygame.quit()

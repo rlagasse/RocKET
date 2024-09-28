@@ -53,6 +53,7 @@ class human:
         # create a rectangle object
         self.rect = self.human.get_rect()
         self.rect.center = (x,y)
+        self.human_mask = pygame.mask.from_surface(self.human)
 
     def draw(self):
         screen.blit(self.human, self.rect)    # draw the vampire on the screen
