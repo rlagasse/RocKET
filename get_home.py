@@ -22,8 +22,23 @@ FPS = 60
 
 # scrolling background
 scroll = 0
-tiles = math.ceil(screen_width/ background_width) + 50 # adds 50 tiles, may increase as needed
-print(tiles)
+tiles = math.ceil(screen_width/ background_width) + 100 # adds 50 tiles, may increase as needed
+
+
+class Sunlight(pygame.sprite.Sprite):
+    def __init__(self, x, y, scale):
+        pygame.sprite.Sprite.__init__(self)
+
+        sun_img = pygame.image.load('assets/sunlight_beam_resize.png')
+        self.sunlight = pygame.transform.scale(sun_img, (int(sun_img.get_width()*scale), sun_img.get_height()*scale)) # scale to screen
+        # create a rectangle object
+        self.rect = self.sunlight.get_rect()
+        self.rect.center = (x,y)
+        self.sunlight_mask = pygame.mask.from_surface(self.sunlight)
+
+    def draw(self):
+        screen.blit(self.sunlight, self.rect)    # draw the vampire on the screen
+
 
 class Vampire(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, speed):
@@ -38,6 +53,8 @@ class Vampire(pygame.sprite.Sprite):
         # create a rectangle object
         self.rect = self.vampire.get_rect()
         self.rect.center = (x,y)
+        self.vampire_mask = pygame.mask.from_surface(self.vampire)
+
 
     def move(self, up, down, left, right): # move the rectangle around
 
@@ -72,21 +89,18 @@ class Vampire(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.vampire, self.rect)    # draw the vampire on the screen
 
-    # def gravity(self):
-    #     self.movey += 3.2
-        
-    #     if self.rect.y > screen_height and self.movey >= 0:
-    #         self.movey= 0
-    #         self.rect.y = screen_height-ty-ty
 
-# generate vampire in center of screen
 user = Vampire(400, 320, 0.5, 1.5) # x, y, scale, speed
-
-
+sunlight = Sunlight(0, 450, 1) # spawn in corner
 
 # main game loop
 game = True
 while game:
+
+    # exit if menu closed
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            game = False
 
     clock.tick(FPS)
 
@@ -94,19 +108,12 @@ while game:
     screen.fill((0, 0, 0))
     for i in range (0, tiles):
         screen.blit(background, (i*background_width + scroll, 0))
-    
     scroll -= 5
     if scroll > background_width:
         scroll = 0
 
-    #pygame.draw.line(screen, (0, 0, 0), (0, FLOOR), (screen_width, FLOOR))
 
-    for event in pygame.event.get():
-
-        # end game
-        if event.type == pygame.QUIT:
-            game = False
-
+    # check key pressed events
     keys = pygame.key.get_pressed()
 
     up = keys[pygame.K_w]
@@ -120,6 +127,11 @@ while game:
 
     user.move(up, down, left, right)
     user.draw() # create user to screen
+
+    sunlight.draw()
+    offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
+        print("collision detected")
 
     pygame.display.update() # display updates
 
