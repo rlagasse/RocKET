@@ -153,7 +153,7 @@ numHumans = 10
 #loops for human
 for i in range(numHumans):
      x = randint(screen_width, screen_width+10000)
-     aHuman = human( x, screen_height-100, 0.05, 1.5)
+     aHuman = human( x, screen_height-150, 0.05, 1.5)
      human_sprites.append(aHuman)
 
 
@@ -230,11 +230,6 @@ while game:
         offset2 = (user.rect.x - aHuman.rect.x, user.rect.y - aHuman.rect.y)
         if aHuman.human_mask.overlap(user.vampire_mask,offset2):
             human_collision()
-        #temp_x_variable = aHuman.rect.x
-        #aHuman.rect.x = aHuman.rect.y
-        #aHuman.rect.x = temp_x_variable
-        #rota_image = pygame.transform.rotate(aHuman., 180)
-
 
     # Health Bar
     health_bar.draw(screen)
@@ -244,9 +239,6 @@ while game:
     offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
-
-
-    
 
     if health_bar.hp == 0:
         print("Game over!")
