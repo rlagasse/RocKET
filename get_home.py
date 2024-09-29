@@ -2,6 +2,9 @@ import pygame
 import math
 import time
 from healthbar import *
+from end_page import *
+
+
 # run with python get_home.py
 
 # key coordinates
@@ -109,28 +112,26 @@ def collision_detected():
     user.health -= 0.5 # decrease health and update
     health_bar.hp = user.health
 
-
-# main game loop
+# Main game loop
 game = True
 while game:
-
-    # exit if menu closed
+    # Exit if menu closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game = False
 
+
     time.tick(FPS)
 
-    # scrolling background
+    # Scrolling background
     screen.fill((0, 0, 0))
-    for i in range (0, tiles):
-        screen.blit(background, (i*background_width + scroll, 0))
+    for i in range(0, tiles):
+        screen.blit(background, (i * background_width + scroll, 0))
     scroll -= 5
-    if scroll > background_width:
+    if scroll <= -background_width:
         scroll = 0
 
-
-    # check key pressed events
+    # Check key pressed events
     keys = pygame.key.get_pressed()
 
     up = keys[pygame.K_w]
@@ -138,22 +139,29 @@ while game:
     left = keys[pygame.K_a]
     right = keys[pygame.K_d]
     jump = keys[pygame.K_SPACE]
-    if jump and user.alive: # user jumped
+    if jump and user.alive:  # User jumped
         user.jump = True
 
     # If the timer hasn't started yet, start it
     if not timer_has_started:
         timer_has_started = True
         start_time = pygame.time.get_ticks()  # Get the current ticks when the timer starts
-    time_elapsed = pygame.time.get_ticks() - start_time      # Calculate how much time has passed since the timer started# Elapsed time in milliseconds
+
+    time_elapsed = pygame.time.get_ticks() - start_time  # Calculate time passed since timer started
 
     time_left = countdown_time - time_elapsed
 
     if time_left <= 0:
         print("Time's up!")
-        time_left = 0  # Set to zero to avoid negative time
         game = False
-        # TODO: go to end screen
+        time_left = 0 # Set to zero to avoid negative time
+
+        # go to endscreen 
+        from end_page import end_page 
+        page = end_page("Won")
+        page.run()
+
+
 
     # Convert remaining time to seconds and format it
     sec = (time_left // 1000) % 60
@@ -167,11 +175,9 @@ while game:
     # Draw the text on the screen
     screen.blit(text_surface, text_rect)
 
-
-
     # Vampire
     user.move(up, down, left, right)
-    user.draw() # create user to screen
+    user.draw()  # Create user to screen
 
     # Health Bar
     health_bar.draw(screen)
@@ -182,12 +188,18 @@ while game:
     if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
         collision_detected()
 
-
     if health_bar.hp == 0:
         print("Game over!")
-        game = False
-        # TODO: go to end screen
+        #game = False
 
-    pygame.display.update() # display updates
+        # go to end screen
+        from end_page import end_page
+        page = end_page("Lost")
+        page.run()
 
+
+    pygame.display.update()  # Display updates
+
+# Game is played when the function is called 
+# play_game()
 pygame.quit()
