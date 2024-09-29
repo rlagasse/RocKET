@@ -1,10 +1,13 @@
 import pygame
 import math
 import time
+import random
 from healthbar import *
 from garlic import Garlic
+from end_page import *
+from end_page import end_page 
 
-import random
+
 # run with python get_home.py
 
 # key coordinates
@@ -222,8 +225,7 @@ scaryMusic = pygame.mixer.Sound("assets/music.mp3")
 # main game loop
 game = True
 while game:
-
-    # exit if menu closed
+    # Exit if menu closed
     for event in pygame.event.get():
         scaryMusic.play()
         if event.type == pygame.QUIT:
@@ -231,16 +233,15 @@ while game:
 
     clock.tick(FPS)
 
-    # scrolling background
+    # Scrolling background
     screen.fill((0, 0, 0))
-    for i in range (0, tiles):
-        screen.blit(background, (i*background_width + scroll, 0))
+    for i in range(0, tiles):
+        screen.blit(background, (i * background_width + scroll, 0))
     scroll -= 5
-    if scroll > background_width:
+    if scroll <= -background_width:
         scroll = 0
 
-
-    # check key pressed events
+    # Check key pressed events
     keys = pygame.key.get_pressed()
 
     up = keys[pygame.K_w]
@@ -248,7 +249,7 @@ while game:
     left = keys[pygame.K_a]
     right = keys[pygame.K_d]
     jump = keys[pygame.K_SPACE]
-    if jump and user.alive: # user jumped
+    if jump and user.alive:  # User jumped
         user.jump = True
 
 
@@ -256,14 +257,21 @@ while game:
     if not timer_has_started:
         timer_has_started = True
         start_time = pygame.time.get_ticks()  # Get the current ticks when the timer starts
-    time_elapsed = pygame.time.get_ticks() - start_time      # Calculate how much time has passed since the timer started# Elapsed time in milliseconds
+
+    time_elapsed = pygame.time.get_ticks() - start_time  # Calculate time passed since timer started
 
     time_left = countdown_time - time_elapsed
     if time_left <= 0:
-        print("You win!")
+        #print("You win!")
         time_left = 0  # Set to zero to avoid negative time
         game = False
-        # TODO: go to end screen
+        time_left = 0 # Set to zero to avoid negative time
+
+        # go to endscreen 
+        page = end_page("Won")
+        page.run()
+
+
 
     # Convert remaining time to seconds and format it
     sec = (time_left // 1000) % 60
@@ -308,32 +316,37 @@ while game:
 
     # Sunlight and Collision
     sunlight.draw()
-    if sec != prev_sec: 
-        if sec < 10: # last 10 seconds sun speeds up
+    if sec != prev_sec:
+        if sec < 10:
             sunlight.update(0.1)
         elif sec < 25:
             sunlight.update(0.05)
         prev_sec = sec
+    
+    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
+        collision_detected(0.5)
 
-    # Garlic and Collision
-    for garlic in garlic_sprites: 
+    # Garli and Collision
+    for garlic in garlic_sprites:
         garlic.update()
         screen.blit(garlic.garlic, garlic.rect)
         gar_offset = (user.rect.x - garlic.rect.x, user.rect.y - garlic.rect.y)
         if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
             collision_detected(1)
 
-    # Sunlight and Collision
-    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
-    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
-        collision_detected(0.5)
-
 
     if health_bar.hp == 0:
-        print("Game over!")
-        game = False
-        # TODO: go to end screen
+        #print("Game over!")
+        #game = False
 
-    pygame.display.update() # display updates
+        # go to end screen
+        page = end_page("Lost")
+        page.run()
 
+
+    pygame.display.update()  # Display updates
+
+# Game is played when the function is called 
+# play_game()
 pygame.quit()
