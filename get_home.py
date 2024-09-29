@@ -262,7 +262,7 @@ while game:
 
     time_left = countdown_time - time_elapsed
     if time_left <= 0:
-        print("You win!")
+        #print("You win!")
         time_left = 0  # Set to zero to avoid negative time
         game = False
         time_left = 0 # Set to zero to avoid negative time
@@ -337,7 +337,7 @@ while game:
 
 
     if health_bar.hp == 0:
-        print("Game over!")
+        #print("Game over!")
         #game = False
 
         # go to end screen
