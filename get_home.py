@@ -216,6 +216,8 @@ def human_collision():
         user.health += 0.5
         health_bar.hp = user.health
 
+# music
+scaryMusic = pygame.mixer.Sound("assets/music.mp3")
 
 # main game loop
 game = True
@@ -223,6 +225,7 @@ while game:
 
     # exit if menu closed
     for event in pygame.event.get():
+        scaryMusic.play()
         if event.type == pygame.QUIT:
             game = False
 
