@@ -1,11 +1,11 @@
 import pygame
 import math
 import time
+import random
 from healthbar import *
 from garlic import Garlic
-
-import random
 from end_page import *
+from end_page import end_page 
 
 
 # run with python get_home.py
@@ -268,7 +268,6 @@ while game:
         time_left = 0 # Set to zero to avoid negative time
 
         # go to endscreen 
-        from end_page import end_page 
         page = end_page("Won")
         page.run()
 
@@ -317,9 +316,24 @@ while game:
 
     # Sunlight and Collision
     sunlight.draw()
-    offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
-    if sunlight.sunlight_mask.overlap(user.vampire_mask, offset):
-        collision_detected()
+    if sec != prev_sec:
+        if sec < 10:
+            sunlight.update(0.1)
+        elif sec < 25:
+            sunlight.update(0.05)
+        prev_sec = sec
+    
+    sun_offset = (user.rect.x - sunlight.rect.x, user.rect.y - sunlight.rect.y)
+    if sunlight.sunlight_mask.overlap(user.vampire_mask, sun_offset):
+        collision_detected(0.5)
+
+    # Garli and Collision
+    for garlic in garlic_sprites:
+        garlic.update()
+        screen.blit(garlic.garlic, garlic.rect)
+        gar_offset = (user.rect.x - garlic.rect.x, user.rect.y - garlic.rect.y)
+        if garlic.garlic_mask.overlap(user.vampire_mask, gar_offset):
+            collision_detected(1)
 
 
     if health_bar.hp == 0:
@@ -327,7 +341,6 @@ while game:
         #game = False
 
         # go to end screen
-        from end_page import end_page
         page = end_page("Lost")
         page.run()
 
