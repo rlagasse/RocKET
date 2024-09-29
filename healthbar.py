@@ -25,8 +25,8 @@ class HealthBar:
 
     def draw(self, surface):
         ratio = self.hp / self.max_hp
-        pygame.draw.rect(surface, "red", (self.x, self.y, self.w, self.h))
-        pygame.draw.rect(surface, "green", (self.x, self.y, self.w * ratio, self.h))
+        pygame.draw.rect(surface, "white", (self.x, self.y, self.w, self.h))
+        pygame.draw.rect(surface, "red", (self.x, self.y, self.w * ratio, self.h))
 
 class Player:
     def get_damage(self, amount):
@@ -51,6 +51,7 @@ health_bar = HealthBar(250, 200, 300, 40, 100)
     
 #     health_bar.hp = 75
 #     health_bar.draw(screen)
+
 
 #     for event in pygame.event.get():
 #         if event.type == pygame.QUIT:
